@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Doctor 🌱</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #81C784;
+            --background-color: #E8F5E9;
+            --text-color: #2E7D32;
+            --shadow-color: rgba(76, 175, 80, 0.2);
+            --accent-color: #FFC107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            background-image: 
+                radial-gradient(circle at 20% 20%, var(--shadow-color) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--shadow-color) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 12px 40px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        .plant-decoration {
+            position: absolute;
+            font-size: 12rem;
+            opacity: 0.08;
+            z-index: 0;
+            transition: all 0.5s ease;
+        }
+
+        .plant-left {
+            left: -3rem;
+            top: -3rem;
+            transform: rotate(-15deg);
+        }
+
+        .plant-right {
+            right: -3rem;
+            bottom: -3rem;
+            transform: rotate(15deg);
+        }
+
+        .container:hover .plant-left {
+            transform: rotate(-5deg) scale(1.1);
+        }
+
+        .container:hover .plant-right {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        h1 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px var(--shadow-color);
+        }
+
+        .upload-container {
+            border: 3px dashed var(--secondary-color);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, white, var(--background-color));
+            cursor: pointer;
+        }
+
+        .upload-container:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .upload-container.drag-over {
+            border-color: var(--accent-color);
+            background: linear-gradient(145deg, white, #FFF8E1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 8px var(--shadow-color);
+            transition: transform 0.3s ease;
+        }
+
+        .upload-container:hover .upload-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            perspective: 1000px;
+        }
+
+        .preview-wrapper {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            opacity: 0;
+            transform: rotateX(-10deg) translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .preview-wrapper.show {
+            opacity: 1;
+            transform: rotateX(0) translateY(0);
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 15px;
+            display: none;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            transition: all 0.3s ease;
+            border: 4px solid white;
+        }
+
+        .preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(129, 199, 132, 0.2),
+                rgba(76, 175, 80, 0.2)
+            );
+            border-radius: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .preview-wrapper:hover .preview-overlay {
+            opacity: 1;
+        }
+
+        .preview-wrapper:hover #imagePreview {
+            transform: scale(1.02);
+        }
+
+        .prediction-container {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            display: none;
+            animation: slideUp 0.5s ease;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            transform-origin: center bottom;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prediction-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--background-color);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .upload-icon {
+                font-size: 4rem;
+            }
+
+            .plant-decoration {
+                font-size: 8rem;
+            }
+
+            .prediction-text {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .container {
+                border-radius: 20px;
+                padding: 1rem;
+            }
+
+            .upload-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .plant-decoration {
+                font-size: 6rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="plant-decoration plant-left">🌱</span>
+        <span class="plant-decoration plant-right">🌿</span>
+        
+        <h1>🪴 Plant Disease Detective 🔍</h1>
+        
+        <form id="uploadForm">
+            <div class="upload-container" id="dropZone">
+                <div class="upload-icon">📸</div>
+                <h2>Upload Your Plant Photo</h2>
+                <p>Drag and drop your image here or click to select</p>
+                <input type="file" id="fileInput" class="file-input" name="image" accept="image/*">
+            </div>
+        </form>
+
+        <div class="loading-spinner" id="loadingSpinner"></div>
+
+        <div class="preview-container">
+            <div class="preview-wrapper" id="previewWrapper">
+                <img id="imagePreview" alt="Preview">
+                <div class="preview-overlay"></div>
+            </div>
+        </div>
+
+        <div class="prediction-container" id="predictionContainer">
+            <p class="prediction-text" id="predictionText">Analyzing your plant...</p>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const predictionContainer = document.getElementById('predictionContainer');
+        const predictionText = document.getElementById('predictionText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // Handle drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleImageUpload(files[0]);
+            }
+        });
+
+        // Handle click upload
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                // Add a small delay before showing the preview wrapper
+                setTimeout(() => {
+                    previewWrapper.classList.add('show');
+                }, 100);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function handleImageUpload(file) {
+            // Reset states
+            previewWrapper.classList.remove('show');
+            loadingSpinner.style.display = 'block';
+            predictionContainer.style.display = 'block';
+            predictionText.textContent = 'Analyzing your plant...';
+
+            showPreview(file);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    predictionText.textContent = `Diagnosis: ${data.prediction}`;
+                } else {
+                    predictionText.textContent = 'Error analyzing image. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                predictionText.textContent = 'Error analyzing image. Please try again.';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
